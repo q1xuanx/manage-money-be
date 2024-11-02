@@ -1,9 +1,6 @@
 package manage.money_manage_be.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +19,7 @@ public class Users {
     private float money;
     private String email;
     private LocalDateTime dateLend;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_account")
+    private Account account;
 }
