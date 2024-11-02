@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 public class UsersController {
     private final UsersService usersService;
     @PostMapping("/create")
@@ -21,7 +22,7 @@ public class UsersController {
     public APIResponse getUsers(@PathVariable String idUser) {
         return usersService.getALlUsers(idUser);
     }
-    @PutMapping("/update/{nameUser}/{total}")
+    @PatchMapping("/update/{nameUser}/{total}")
     public APIResponse updateUser(@PathVariable String nameUser, @PathVariable Float total) throws MessagingException {
         return usersService.deleteMoneyLend(total, nameUser);
     }

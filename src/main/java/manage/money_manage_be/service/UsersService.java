@@ -101,16 +101,10 @@ public class UsersService {
         if (findExist.isPresent()) {
             Users user = findExist.get();
             user.setMoney(user.getMoney() - money);
-            if (user.getMoney() <= 0) {
-                userRepository.delete(user);
-            }else {
-                userRepository.save(user);
-            }
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
             helper.setTo(user.getEmail());
             helper.setSubject("BẠN ĐÃ TRẢ TIỀN THÀNH CÔNG");
-
             String body = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>" +
                     "<h2 style='color: #4CAF50; text-align: center;'>Bạn đã trả tiền thành công!</h2>" +
                     "<p>Chào bạn,</p>" +
@@ -124,6 +118,11 @@ public class UsersService {
             helper.setFrom("nhanphmhoang@gmail.com");
             helper.setTo(user.getEmail());
             mailSender.send(message);
+            if (user.getMoney() <= 0) {
+                userRepository.delete(user);
+            }else {
+                userRepository.save(user);
+            }
             return new APIResponse(200,"success", "ok da tru " + money);
         }
         return new APIResponse(404, "not found", null);
