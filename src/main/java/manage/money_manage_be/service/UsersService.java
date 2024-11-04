@@ -51,7 +51,7 @@ public class UsersService {
                 "<p>Chào bạn,</p>" +
                 "<p>Bạn đã mượn từ <strong>" + account.getFullName() + "</strong> số tiền: <strong style='color: #FF5722;'>" + users.getMoney() + " VND</strong> vào ngày: <strong>" + users.getDateLend() + "</strong>.</p>" +
                 "<p style='margin-top: 20px;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>" +
-                "<p style='margin-top: 40px; text-align: right;'>Trân trọng,<br><strong>Phạm Hoàng Nhân</strong></p>" +
+                "<p style='margin-top: 40px; text-align: right;'>Trân trọng,<br><strong>" + account.getFullName() +"</strong></p>" +
                 "<hr style='border: 0; border-top: 1px solid #ddd; margin: 30px 0;'>" +
                 "<p style='font-size: 12px; color: #999; text-align: center;'>Đây là email tự động, vui lòng không trả lời.</p>" +
                 "</div>";
