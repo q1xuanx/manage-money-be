@@ -34,4 +34,8 @@ public class UsersController {
     public APIResponse remind(@PathVariable String idUser) throws MessagingException {
         return usersService.remind(idUser);
     }
+    @PostMapping("/confirm/{id}")
+    public APIResponse confirm(@PathVariable String id) throws MessagingException {
+        return usersService.confirmRent(id);
+    }
 }

@@ -20,6 +20,6 @@ public class Users {
     private String email;
     private LocalDateTime dateLend;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_account")
     private Account account;
+    private int isConfirmed;
 }
