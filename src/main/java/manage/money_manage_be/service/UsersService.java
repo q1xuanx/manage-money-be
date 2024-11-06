@@ -60,7 +60,6 @@ public class UsersService {
         helper.setFrom("nhanphmhoang@gmail.com");
         helper.setSubject("no-reply");
         mailSender.send(message);
-        mailSender.send(message);
         return new APIResponse(200, "saved", user);
     }
     public APIResponse getALlUsers(String idAccount){
