@@ -15,9 +15,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -63,11 +61,11 @@ public class UsersService {
         return new APIResponse(200, "saved", user);
     }
     public APIResponse getALlUsers(String idAccount){
-        List<Users> users = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idAccount) && s.getIsConfirmed() == 1).toList();
+        List<Users> users = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idAccount) && s.getIsConfirmed() == 1 && s.getMoney() > 0).toList();
         return new APIResponse(200, "list users", users);
     }
     public APIResponse totalDay(String idAccount){
-        List<Users> users = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idAccount) && s.getIsConfirmed() == 1).toList();
+        List<Users> users = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idAccount) && s.getIsConfirmed() == 1 && s.getMoney() > 0).toList();
         double total = users.stream().mapToDouble(s -> (double) s.getMoney()).sum();
         return new APIResponse(200, "total day", total);
     }
@@ -120,11 +118,6 @@ public class UsersService {
             helper.setFrom("nhanphmhoang@gmail.com");
             helper.setTo(user.getEmail());
             mailSender.send(message);
-            if (user.getMoney() <= 0) {
-                userRepository.delete(user);
-            }else {
-                userRepository.save(user);
-            }
             return new APIResponse(200,"success", "ok da tru " + money);
         }
         return new APIResponse(404, "not found", null);
@@ -166,5 +159,17 @@ public class UsersService {
             }
         }
         System.out.println("Task complete, remove: " + count + " users");
+    }
+    public APIResponse totalOfUserHaveRent(String idUser){
+        List<Users> list = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idUser)).toList();
+        Map<String, Float> totalRent = new HashMap<>();
+        for (Users user : list) {
+            if (!totalRent.containsKey(user.getNameUser())){
+                totalRent.put(user.getNameUser().trim().toLowerCase(), user.getMoney());
+            }else {
+                totalRent.put(user.getNameUser().trim().toLowerCase(), totalRent.get(user.getNameUser()) + user.getMoney());
+            }
+        }
+        return new APIResponse(200, "success", totalRent);
     }
 }

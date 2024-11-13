@@ -38,4 +38,8 @@ public class UsersController {
     public APIResponse confirm(@PathVariable String id) throws MessagingException {
         return usersService.confirmRent(id);
     }
+    @GetMapping("/analyst/{id}")
+    public APIResponse analyst(@PathVariable String id) throws MessagingException {
+        return usersService.totalOfUserHaveRent(id);
+    }
 }
