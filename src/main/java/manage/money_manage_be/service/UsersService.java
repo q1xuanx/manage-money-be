@@ -103,7 +103,7 @@ public class UsersService {
         System.out.println("Task complete, remove: " + count + " users");
     }
     public APIResponse totalOfUserHaveRent(String idUser){
-        List<Users> list = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idUser)).toList();
+        List<Users> list = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idUser) && s.getIsConfirmed() == 1).toList();
         Map<String, Float> totalRent = new HashMap<>();
         for (Users user : list) {
             if (!totalRent.containsKey(user.getNameUser())){
