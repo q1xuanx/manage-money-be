@@ -7,9 +7,11 @@ import manage.money_manage_be.models.Users;
 import manage.money_manage_be.reponse.APIResponse;
 import manage.money_manage_be.repository.UserRepository;
 import manage.money_manage_be.request.CreateNewUserRequest;
+import manage.money_manage_be.request.VoiceRequest;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.awt.geom.QuadCurve2D;
 import java.time.*;
 import java.util.*;
 
@@ -114,4 +116,41 @@ public class UsersService {
         }
         return new APIResponse(200, "success", totalRent);
     }
+    public APIResponse splitTextToAddDb(VoiceRequest voiceRequest){
+        voiceRequest.setText(voiceRequest.getText().toLowerCase());
+        String[] fullNameParts = voiceRequest.getText().split("thêm");
+        if (fullNameParts.length < 2) {
+            return new APIResponse(404, "full name not found", null);
+        }
+        String fullName = fullNameParts[1].split("số tiền")[0].trim();
+        String[] moneyParts = voiceRequest.getText().split("số tiền");
+        if (moneyParts.length < 2){
+            return new APIResponse(404, "money not found", null);
+        }
+        Float money = Float.valueOf(moneyParts[1].split("email")[0].trim());
+        String[] emailParts = voiceRequest.getText().split("email");
+        if (emailParts.length < 2){
+            return new APIResponse(404, "email not found", null);
+        }
+        String email = emailParts[1].trim();
+        if (fullName.isEmpty() || email.isEmpty()){
+            return new APIResponse(404, "full name or email not found", null);
+        }
+        Account account = accountService.getAccount(voiceRequest.getIdAccount());
+        if (account == null) {
+            return new APIResponse(404, "account not found", null);
+        }
+        Users users = new Users();
+        users.setNameUser(fullName);
+        users.setEmail(email);
+        users.setMoney(money);
+        OffsetDateTime offsetDateTime = OffsetDateTime.now(ZoneOffset.ofHours(7));
+        LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
+        users.setDateLend(localDateTime);
+        users.setAccount(account);
+        emailServices.sendEmailConfirm(mailSender,users,account);
+        return new APIResponse(200, "success", "Đã lưu lại thông tin thành công");
+    }
+
+    //thêm Hoàng Nhân số tiền 20000 email nhoang2929@gmail.com
 }

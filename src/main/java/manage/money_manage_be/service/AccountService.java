@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,6 +50,10 @@ public class AccountService implements UserDetailsService {
         }
         String token = jwtTokenProvider.generateToken(new CustomAccountDetails(account));
         return new APIResponse(200, token, account.getIdAccount());
+    }
+    public APIResponse listAccounts() {
+        List<Account> accounts = accountRepository.findAll();
+        return new APIResponse(200, "success", accounts);
     }
     public Account getAccount(String id) {
         return accountRepository.findById(id).orElse(null);
