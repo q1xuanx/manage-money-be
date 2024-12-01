@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import manage.money_manage_be.reponse.APIResponse;
 import manage.money_manage_be.request.CreateNewUserRequest;
@@ -75,7 +76,7 @@ public class UsersController {
             @ApiResponse(code = 200, message = "Giao dịch đã được xác nhận"),
             @ApiResponse(code = 404, message = "User không được tìm thấy hoặc đã xác nhận trước đó")
     })
-    public APIResponse confirm(@PathVariable String id) throws MessagingException {
+    public APIResponse confirm(@PathVariable String id) {
         return usersService.confirmRent(id);
     }
 
@@ -97,5 +98,14 @@ public class UsersController {
     })
     public APIResponse voice(@RequestBody VoiceRequest voiceRequest) {
         return usersService.splitTextToAddDb(voiceRequest);
+    }
+    @ApiOperation(value = "Xử lý khi đã thanh toán xong")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Thành công"),
+            @ApiResponse(code = 400, message = "Có lỗi trong quá trình thanh toán")
+    })
+    @GetMapping("/confirm/payment")
+    public APIResponse statusPayment(@RequestParam String vnp_Amount, @RequestParam String vnp_BankCode, @RequestParam String vnp_OrderInfo, @RequestParam String vnp_ResponseCode, HttpSession httpSession){
+        return usersService.statusPayment(vnp_ResponseCode,vnp_OrderInfo);
     }
 }

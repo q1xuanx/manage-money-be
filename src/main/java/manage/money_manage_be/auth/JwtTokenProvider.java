@@ -1,4 +1,4 @@
-package manage.money_manage_be.service;
+package manage.money_manage_be.auth;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;

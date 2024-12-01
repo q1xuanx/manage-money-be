@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "API quản lý tài khoản trong hệ thống")
 public class AccountController {
     private final AccountService accountService;
-
     @PostMapping("/login")
     @ApiOperation(value = "Đăng nhập", notes = "Endpoint để đăng nhập vào hệ thống bằng username và password.")
     @ApiResponses(value = {
@@ -37,7 +36,10 @@ public class AccountController {
     public APIResponse registerController(@RequestBody Account account){
         return accountService.register(account);
     }
-
+    @GetMapping("/get-account/{idAccount}")
+    public APIResponse getAccount(@PathVariable String idAccount){
+        return accountService.getInformation(idAccount);
+    }
     @GetMapping("/list-account")
     @ApiOperation(value = "Lấy danh sách tài khoản", notes = "Endpoint để lấy danh sách tất cả các tài khoản.")
     @ApiResponses(value = {
@@ -45,5 +47,13 @@ public class AccountController {
     })
     public APIResponse listAccount(){
         return accountService.listAccounts();
+    }
+    @PostMapping("/confirm")
+    @ApiOperation(value = "Xác nhận email của người dùng", notes = "Endpoint để lấy danh sách tất cả các tài khoản.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Xác nhận thành công")
+    })
+    public APIResponse confirmAccount(@RequestBody String idAccount){
+        return accountService.confirmEmail(idAccount);
     }
 }

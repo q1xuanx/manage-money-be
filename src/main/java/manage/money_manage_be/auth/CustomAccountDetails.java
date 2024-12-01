@@ -1,4 +1,4 @@
-package manage.money_manage_be.service;
+package manage.money_manage_be.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
