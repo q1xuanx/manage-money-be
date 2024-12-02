@@ -13,6 +13,7 @@ import manage.money_manage_be.reponse.APIResponse;
 import manage.money_manage_be.request.CreateAccountRequest;
 import manage.money_manage_be.request.LoginRequest;
 import manage.money_manage_be.service.AccountService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -88,7 +89,7 @@ public class AccountController {
             @ApiResponse(responseCode = "200", description = "Xác nhận thành công", content = @Content(schema = @Schema(implementation = APIResponse.class), examples = @ExampleObject(value = "{ \"code\": 200, \"message\": \"confirm\", \"data\": null }"))),
             @ApiResponse(responseCode = "400", description = "Tài khoản không tồn tại hoặc đã được xác nhận", content = @Content(schema = @Schema(implementation = APIResponse.class), examples = @ExampleObject(value = "{ \"code\": 400, \"message\": \"account does not exist or is confirmed\", \"data\": null }")))
     })
-    public APIResponse confirmAccount(
+    public ResponseEntity<String> confirmAccount(
             @PathVariable @Parameter(description = "ID tài khoản", example = "12345", required = true) String idAccount) {
         return accountService.confirmEmail(idAccount);
     }

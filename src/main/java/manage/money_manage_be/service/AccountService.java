@@ -11,6 +11,8 @@ import manage.money_manage_be.request.CreateAccountRequest;
 import manage.money_manage_be.request.LoginRequest;
 import manage.money_manage_be.reponse.AccountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -100,14 +102,54 @@ public class AccountService implements UserDetailsService {
         List<Account> accounts = accountRepository.findAll();
         return new APIResponse(200, "success", accounts);
     }
-    public APIResponse confirmEmail(String idAccount){
+    public ResponseEntity<String> confirmEmail(String idAccount){
         Optional<Account> account = accountRepository.findById(idAccount);
         if (account.isPresent() && account.get().getIsConfirm() == 0) {
             account.get().setIsConfirm(1);
             accountRepository.save(account.get());
-            return new APIResponse(200, "confirm", account);
+            String successHtml = "<html>" +
+                    "<head>" +
+                    "<title>Xác nhận thành công</title>" +
+                    "<style>" +
+                    "body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f2f2f2; }" +
+                    ".container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #4CAF50; border-radius: 8px; background-color: #e7f9e7; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }" +
+                    ".success { color: #4CAF50; font-size: 28px; margin-bottom: 20px; }" +
+                    ".message { color: #333; font-size: 18px; }" +
+                    "a { color: #4CAF50; text-decoration: none; }" +
+                    "a:hover { text-decoration: underline; }" +
+                    "</style>" +
+                    "</head>" +
+                    "<body>" +
+                    "<div class='container'>" +
+                    "<h2 class='success'>Xác nhận thành công!</h2>" +
+                    "<p class='message'>Cảm ơn bạn đã xác nhận. Bạn đã hoàn thành quy trình.</p>" +
+                    "<p class='message'><a href='mailto:nhanphamhoang@gmail.com'>Liên hệ hỗ trợ</a> nếu bạn gặp vấn đề.</p>" +
+                    "</div>" +
+                    "</body>" +
+                    "</html>";
+            return new ResponseEntity<>(successHtml, HttpStatus.OK);
         }
-        return new APIResponse(400, "account does not exist or is confirmed", null);
+        String errorHtml = "<html>" +
+                "<head>" +
+                "<title>Thông báo lỗi</title>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f2f2f2; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f44336; border-radius: 8px; background-color: #ffe6e6; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }" +
+                ".error { color: #f44336; font-size: 28px; margin-bottom: 20px; }" +
+                ".message { color: #333; font-size: 18px; }" +
+                "a { color: #f44336; text-decoration: none; }" +
+                "a:hover { text-decoration: underline; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<h2 class='error'>Thông tin xác nhận không chính xác</h2>" +
+                "<p class='message'>Vui lòng kiểm tra lại thông tin xác nhận của bạn.</p>" +
+                "<p class='message'><a href='mailto:nhanphamhoang@gmail.com'>Liên hệ hỗ trợ</a> nếu bạn gặp vấn đề.</p>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+        return new ResponseEntity<>(errorHtml, HttpStatus.NOT_FOUND);
     }
     public Account getAccount(String id) {
         return accountRepository.findById(id).orElse(null);

@@ -19,6 +19,7 @@ import manage.money_manage_be.reponse.APIResponse;
 import manage.money_manage_be.request.CreateNewUserRequest;
 import manage.money_manage_be.request.VoiceRequest;
 import manage.money_manage_be.service.UsersService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -198,7 +199,7 @@ public class InfoUserRentController {
     }
 
     @GetMapping("/confirm/{id}")
-    public APIResponse confirmRent(
+    public ResponseEntity<String> confirmRent(
             @PathVariable @Parameter(name = "id", description = "Id của người đang mượn tiền", example = "094db1ab-9cab-4bb9-9fc5-b10e8196fb24", required = true)
             String id) {
         return usersService.confirmRent(id);
@@ -267,7 +268,7 @@ public class InfoUserRentController {
 
 
     @GetMapping("/confirm/payment")
-    public APIResponse statusPayment(
+    public ResponseEntity<String> statusPayment(
             @RequestParam @Parameter(name = "vnp_Amount", description = "Số tiền thanh toán", required = true)
             String vnp_Amount,
             @RequestParam @Parameter(name = "vnp_BankCode", description = "Mã ngân hàng", required = true)
