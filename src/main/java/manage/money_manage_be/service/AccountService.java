@@ -7,6 +7,7 @@ import manage.money_manage_be.auth.JwtTokenProvider;
 import manage.money_manage_be.models.Account;
 import manage.money_manage_be.reponse.APIResponse;
 import manage.money_manage_be.repository.AccountRepository;
+import manage.money_manage_be.request.CreateAccountRequest;
 import manage.money_manage_be.request.LoginRequest;
 import manage.money_manage_be.reponse.AccountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,20 +42,24 @@ public class AccountService implements UserDetailsService {
         }
         return new CustomAccountDetails(account.get());
     }
-    public APIResponse register(Account account) {
-        if (accountRepository.findByUsername(account.getUsername()) != null) {
+    public APIResponse register(CreateAccountRequest createAccountRequest) {
+        if (accountRepository.findByUsername(createAccountRequest.getUserName()) != null) {
             return new APIResponse(400, "username exist", null);
         }
-        if (account.getEmail() == null || accountRepository.findByEmail(account.getEmail())){
-            return new APIResponse(400, "email is required", null);
+        if (createAccountRequest.getEmail() == null || accountRepository.findByEmail(createAccountRequest.getEmail()) != null) {
+            return new APIResponse(400, "email is required || email exist", null);
         }
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
+        Account account = new Account();
+        account.setEmail(createAccountRequest.getEmail());
+        account.setUsername(createAccountRequest.getUserName());
+        account.setPassword(passwordEncoder.encode(createAccountRequest.getPassword()));
+        account.setFullName(createAccountRequest.getFullName());
         OffsetDateTime offsetDateTime = OffsetDateTime.now(ZoneOffset.ofHours(7));
         LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
         account.setDateSendConfirm(localDateTime);
-        Account saved = accountRepository.save(account);
-        //emailServices.confirmAccount(mailSender, account);
-        return new APIResponse(200, "success please confirm your email", saved);
+        accountRepository.save(account);
+        emailServices.confirmAccount(mailSender, account);
+        return new APIResponse(200, "success please confirm your email", "saved please back to login");
     }
     public void updateWallet(Account account){
         accountRepository.save(account);

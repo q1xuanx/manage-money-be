@@ -2,7 +2,6 @@ package manage.money_manage_be.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import manage.money_manage_be.configuation.VnPayConfig;
 import manage.money_manage_be.models.Account;
 import manage.money_manage_be.models.TrainsactionHistory;
@@ -14,9 +13,6 @@ import manage.money_manage_be.request.VoiceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import java.awt.geom.QuadCurve2D;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -35,9 +31,12 @@ public class UsersService {
     private EmailServices emailServices;
     @Autowired
     private TransactionHistoryServices transactionHistoryServices;
-    public APIResponse createUser(CreateNewUserRequest user) throws MessagingException {
+    public APIResponse createUser(CreateNewUserRequest user) {
         if (user.getNameUser().isEmpty()) {
-            return new APIResponse(404, "name is empty", null);
+            return new APIResponse(400, "name is empty", null);
+        }
+        if (user.getEmail().isEmpty()){
+            return new APIResponse(400, "email is empty", null);
         }
         Account account = accountService.getAccount(user.getIdAccount());
         if (account == null) {
@@ -73,14 +72,21 @@ public class UsersService {
         }
         return new APIResponse(404, "not found", null);
     }
-    public APIResponse deleteMoneyLend (float money, String nameUser) throws MessagingException {
+    public APIResponse deleteMoneyLend (float money, String idUser) {
         List<Users> list = userRepository.findAll();
-        Optional<Users> findExist = list.stream().filter(s -> s.getId().equals(nameUser)).findFirst();
+        Optional<Users> findExist = list.stream().filter(s -> s.getId().equals(idUser)).findFirst();
         if (findExist.isPresent()) {
             Users user = findExist.get();
             user.setMoney(user.getMoney() - money);
+            if (money > user.getMoney()){
+                return new APIResponse(400, "error", "Số tiền nhập không hợp lệ");
+            }
+            emailServices.sendPaymentEmail(user, mailSender, money);
+            if (user.getMoney() <= 0){
+                userRepository.delete(user);
+                return new APIResponse(200, "success", "da tru thanh cong và xóa user do đã hết nợ");
+            }
             userRepository.save(user);
-            emailServices.sendPaymentEmail(user,mailSender,money);
             return new APIResponse(200,"success", "ok da tru " + money);
         }
         return new APIResponse(404, "not found", null);
@@ -95,10 +101,11 @@ public class UsersService {
             user.setIsConfirmed(1);
             userRepository.save(user);
             emailServices.sendEmailSuccessRent(mailSender,user);
-            return new APIResponse(200, "confirm", user);
+            return new APIResponse(200, "confirm", "success");
         }
         return new APIResponse(404, "not found", null);
     }
+    // Search where user rent is not confirm after 5 min then deletes it.
     public void deleteUserRent () {
         List<Users> listUser = userRepository.findAll();
         Iterator<Users> iterator = listUser.iterator();
@@ -118,7 +125,7 @@ public class UsersService {
         System.out.println("Task complete, remove: " + count + " users");
     }
     public APIResponse totalOfUserHaveRent(String idUser){
-        List<Users> list = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idUser) && s.getIsConfirmed() == 1).toList();
+        List<Users> list = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idUser) && s.getIsConfirmed() == 1 && s.getMoney() > 0).toList();
         Map<String, Float> totalRent = new HashMap<>();
         for (Users user : list) {
             if (!totalRent.containsKey(user.getNameUser())){

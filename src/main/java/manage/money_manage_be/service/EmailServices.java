@@ -19,8 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 @Service
 public class EmailServices {
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
-    private static final String BASE_URL = "http://localhost:5500";
+    private static final String BASE_URL = "http://52.200.132.159";
     @Autowired
     private UsersService usersService;
     @Autowired
@@ -37,7 +36,7 @@ public class EmailServices {
                         "<p>Chào bạn,</p>" +
                         "<p>Bạn đã mượn từ <strong>" + account.getFullName() + "</strong> số tiền: <strong style='color: #FF5722;'>" + users.getMoney() + " VND</strong> vào ngày: <strong>" + users.getDateLend() + "</strong>.</p>" +
                         "<p>Vui lòng nhấp vào liên kết dưới đây để xác nhận:</p>" +
-                        "<p style='text-align: center;'><a href='"+BASE_URL+"/confirm.html?id="+users.getId()+"' style='display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Xác nhận ngay</a></p>" +
+                        "<p style='text-align: center;'><a href='"+BASE_URL+"/confirm/"+users.getId()+"' style='display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Xác nhận ngay</a></p>" +
                         "<p style='text-align: center;'><a href='"+payUrl+"' style='display: inline-block; background-color: #FF5722; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;'>Thanh toán ngay</a></p>" +
                         "<p style='margin-top: 20px;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>" +
                         "<p style='margin-top: 40px; text-align: right;'>Trân trọng,<br><strong>" + account.getFullName() + "</strong></p>" +
@@ -92,7 +91,7 @@ public class EmailServices {
                         "<p>Chào bạn,</p>" +
                         "<p>Chúng tôi đã nhận được yêu cầu xác nhận tài khoản từ bạn.</p>" +
                         "<p>Vui lòng nhấp vào liên kết dưới đây để xác nhận tài khoản của bạn:</p>" +
-                        "<p style='text-align: center;'><a href='"+BASE_URL+"/confirm.html?id=" + account.getIdAccount() + "' style='display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Xác nhận ngay</a></p>" +
+                        "<p style='text-align: center;'><a href='"+BASE_URL+"/auth/confirm/" + account.getIdAccount() + "' style='display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Xác nhận ngay</a></p>" +
                         "<p style='margin-top: 20px;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>" +
                         "<p style='margin-top: 40px; text-align: right;'>Trân trọng,<br><strong>Đội ngũ hỗ trợ</strong></p>" +
                         "<hr style='border: 0; border-top: 1px solid #ddd; margin: 30px 0;'>" +
@@ -107,7 +106,6 @@ public class EmailServices {
             }
         });
     }
-
     public void sendRemindEmail(JavaMailSender mailSender, Users user){
         CompletableFuture.runAsync(() -> {
             try{
