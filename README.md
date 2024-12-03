@@ -36,8 +36,7 @@ This project is the back-end API for the Manage Money system, which helps users 
 
 4. The API will be available at `http://localhost:8080`.
 
-## API Endpoints
-
+## API Endpoints: [Hosting](http://52.200.132.159/swagger-ui/index.html)
 ### User Management
 
 - **POST** `/api/users/create`: Create a new user.
