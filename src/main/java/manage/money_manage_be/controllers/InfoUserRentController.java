@@ -1,9 +1,5 @@
 package manage.money_manage_be.controllers;
 
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.OpenAPI31;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -91,7 +87,7 @@ public class InfoUserRentController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = APIResponse.class),
                             examples = @ExampleObject(
-                                    value = "{ \"code\": 200, \"message\": \"list users\", \"data\": [ { \"id\": \"839f9465-acd1-4c28-ae99-c31f5423cdcc\", \"nameUser\": \"hoang nhan\", \"money\": 10000.0, \"email\": \"nhoang2929@gmail.com\", \"dateLend\": \"2024-12-02T14:17:35.705531\", \"account\": { \"idAccount\": \"c5543f59-fddf-4fce-b63b-1a1af89e4931\", \"username\": \"nhan12348\", \"password\": \"$2a$10$23pfKD1zfmCX59DnZcAiqu7ebeIcO1jXzypBcGLl9tuYC48By/lSK\", \"fullName\": \"nhan\", \"email\": \"iamtest001122@gmail.com\", \"isConfirm\": 1, \"dateSendConfirm\": \"2024-12-02T12:59:33.554523\", \"wallet\": 0.0 }, \"isConfirmed\": 1 } ] }"
+                                    value = "{ \"code\": 200, \"message\": \"list users\", \"data\": { \"listUsers\": [ { \"id\": \"839f9465-acd1-4c28-ae99-c31f5423cdcc\", \"nameUser\": \"hoang nhan\", \"money\": 10000.0, \"email\": \"nhoang2929@gmail.com\", \"dateLend\": \"2024-12-02T14:17:35.705531\" } ], \"totalsValue\": 10000.0 } }"
                             )
                     )
             ),
@@ -112,7 +108,6 @@ public class InfoUserRentController {
             String idAccount) {
         return usersService.getALlUsers(idAccount);
     }
-
 
     @PatchMapping("/update/{idUser}/{total}")
     @Operation(summary = "Cập nhật số tiền đã trả cho người mượn", description = "Endpoint để cập nhật số tiền cho một user dựa trên tên id của người mượn.")
@@ -156,27 +151,6 @@ public class InfoUserRentController {
             @PathVariable @Parameter(name = "total", description = "Số tiền người đó đã trả", example = "10000", required = true) Float total) {
         return usersService.deleteMoneyLend(total, idUser);
     }
-
-    @GetMapping("/totals/{idAccount}")
-    @Operation(summary = "Tính tổng số tiền", description = "Endpoint để tính tổng số tiền mà những người đã mượn theo id của account đang đăng nhập.")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Tính tổng số tiền thành công",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = APIResponse.class),
-                            examples = @ExampleObject(
-                                    value = "{ \"code\": 200, \"message\": \"total day\", \"data\": \"120000\" }"
-                            )
-                    )
-            )
-    })
-    public APIResponse getTotals(
-            @PathVariable @Parameter(name = "idAccount", description = "Id của tài khoản đang đăng nhập", example = "e768246b-3fbb-42f2-acd0-cc9a77048850", required = true) String idAccount) {
-        return usersService.totalDay(idAccount);
-    }
-
 
     @GetMapping("/remind/{idUser}")
     @Operation(summary = "Nhắc nhở người mượn tiền", description = "Endpoint để nhắc nhở qua email người đang mượn tiền.")

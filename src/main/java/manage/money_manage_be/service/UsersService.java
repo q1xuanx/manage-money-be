@@ -7,6 +7,8 @@ import manage.money_manage_be.models.Account;
 import manage.money_manage_be.models.TrainsactionHistory;
 import manage.money_manage_be.models.Users;
 import manage.money_manage_be.reponse.APIResponse;
+import manage.money_manage_be.reponse.ListUserResponse;
+import manage.money_manage_be.reponse.UserResponse;
 import manage.money_manage_be.repository.UserRepository;
 import manage.money_manage_be.request.CreateNewUserRequest;
 import manage.money_manage_be.request.VoiceRequest;
@@ -58,14 +60,17 @@ public class UsersService {
     }
     public APIResponse getALlUsers(String idAccount){
         List<Users> users = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idAccount) && s.getIsConfirmed() == 1 && s.getMoney() > 0).toList();
-        return new APIResponse(200, "list users", users);
+        List<UserResponse> listUsers = new ArrayList<>();
+        float totals = 0;
+        for (Users user : users) {
+            UserResponse userResponse = new UserResponse(user.getId(), user.getNameUser(),user.getMoney(), user.getEmail(), user.getDateLend());
+            listUsers.add(userResponse);
+            totals += user.getMoney();
+        }
+        ListUserResponse listUserResponse = new ListUserResponse(listUsers, totals);
+        return new APIResponse(200, "list users", listUserResponse);
     }
-    public APIResponse totalDay(String idAccount){
-        List<Users> users = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idAccount) && s.getIsConfirmed() == 1 && s.getMoney() > 0).toList();
-        double total = users.stream().mapToDouble(s -> (double) s.getMoney()).sum();
-        return new APIResponse(200, "total day", total);
-    }
-    public APIResponse remind(String idUser) throws MessagingException {
+    public APIResponse remind(String idUser)  {
         Optional<Users> find = userRepository.findById(idUser);
         if (find.isPresent()) {
             Users user = find.get();
