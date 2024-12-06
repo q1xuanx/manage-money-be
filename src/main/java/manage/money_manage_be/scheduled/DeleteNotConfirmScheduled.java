@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeleteNotConfirmScheduled {
     private final UsersService usersService;
-    @Scheduled(fixedRate = 10 * 60 * 500)
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void deleteNotConfirm() {
         usersService.deleteUserRent();
     }

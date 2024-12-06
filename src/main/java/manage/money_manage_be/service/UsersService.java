@@ -1,6 +1,4 @@
 package manage.money_manage_be.service;
-
-import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import manage.money_manage_be.configuation.VnPayConfig;
 import manage.money_manage_be.models.Account;
@@ -11,6 +9,7 @@ import manage.money_manage_be.reponse.ListUserResponse;
 import manage.money_manage_be.reponse.UserResponse;
 import manage.money_manage_be.repository.UserRepository;
 import manage.money_manage_be.request.CreateNewUserRequest;
+import manage.money_manage_be.request.InfoUserRentRequest;
 import manage.money_manage_be.request.VoiceRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 @Service
 public class UsersService {
@@ -84,10 +84,10 @@ public class UsersService {
         Optional<Users> findExist = list.stream().filter(s -> s.getId().equals(idUser)).findFirst();
         if (findExist.isPresent()) {
             Users user = findExist.get();
-            user.setMoney(user.getMoney() - money);
             if (money > user.getMoney()){
                 return new APIResponse(400, "error", "Số tiền nhập không hợp lệ");
             }
+            user.setMoney(user.getMoney() - money);
             emailServices.sendPaymentEmail(user, mailSender, money);
             if (user.getMoney() <= 0){
                 userRepository.delete(user);
@@ -176,22 +176,47 @@ public class UsersService {
 
     // Search where user rent is not confirm after 5 min then deletes it.
     public void deleteUserRent () {
-        List<Users> listUser = userRepository.findAll();
+        List<Users> listUser = userRepository.findByIsConfirmed(0);
         Iterator<Users> iterator = listUser.iterator();
         OffsetDateTime offsetDateTime = OffsetDateTime.now(ZoneOffset.ofHours(7));
         LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
         int count = 0;
+        Map<Account, Set<InfoUserRentRequest>> sendEmailBack = new HashMap<>();
         while (iterator.hasNext()) {
             Users user = iterator.next();
-            if (user.getIsConfirmed() == 0) {
-                Duration duration = Duration.between(user.getDateLend(), localDateTime);
-                if (duration.toMinutes() > 5) {
-                    userRepository.delete(user);
-                    count++;
+            Duration duration = Duration.between(user.getDateLend(), localDateTime);
+            if (duration.toMinutes() > 5) {
+                if (!sendEmailBack.containsKey(user.getAccount())){
+                    sendEmailBack.put(user.getAccount(), new HashSet<>());
+                    sendEmailBack.get(user.getAccount()).add(new InfoUserRentRequest(user.getNameUser(), user.getMoney(), user.getEmail()));
+                }else {
+                    sendEmailBack.get(user.getAccount()).add(new InfoUserRentRequest(user.getNameUser(), user.getMoney(), user.getEmail()));
                 }
+                userRepository.delete(user);
+                count++;
             }
         }
-        System.out.println("Task complete, remove: " + count + " users");
+        if (sendEmailBack.isEmpty()){
+            System.out.println("Task complete, remove: " + count + " users -> continue send email back for account");
+            return;
+        }
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        CompletionService<Void> completionService = new ExecutorCompletionService<>(executorService);
+        for (Map.Entry<Account, Set<InfoUserRentRequest>> entry : sendEmailBack.entrySet()) {
+            Set<InfoUserRentRequest> listUserNotConfirm = entry.getValue();
+            completionService.submit(() -> {
+                emailServices.sendBackEmailToAccount(entry.getKey(), mailSender, listUserNotConfirm);
+                System.out.println("Send email to: " + entry.getKey().getEmail());
+                return null;
+            });
+        }
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
     public APIResponse totalOfUserHaveRent(String idUser){
         List<Users> list = userRepository.findAll().stream().filter(s -> s.getAccount().getIdAccount().equals(idUser) && s.getIsConfirmed() == 1 && s.getMoney() > 0).toList();
@@ -337,5 +362,4 @@ public class UsersService {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("<html><body><h2>Giao dịch thất bại với mã: " + vnp_ResponseCode + "</h2></body></html>");
     }
-
 }

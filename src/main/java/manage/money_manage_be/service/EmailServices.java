@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import manage.money_manage_be.models.Account;
 import manage.money_manage_be.models.Users;
+import manage.money_manage_be.request.InfoUserRentRequest;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -174,5 +176,56 @@ public class EmailServices {
             }
         });
     }
-
+    public void sendBackEmailToAccount(Account account, JavaMailSender mailSender, Set<InfoUserRentRequest> list) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                String body = """
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
+                    <h2 style='color: #4CAF50; text-align: center;'>Danh sách người dùng chưa xác nhận khoản vay</h2>
+                    <p>Chào bạn,</p>
+                    <p>Dưới đây là danh sách các người dùng chưa xác nhận:</p>
+                    <table style='width: 100%%; border-collapse: collapse; margin-top: 20px;'>
+                        <thead>
+                            <tr style='background-color: #0288d1; color: white;'>
+                                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Tên</th>
+                                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Số tiền (VNĐ)</th>
+                                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            %s
+                        </tbody>
+                    </table>
+                    <p style='margin-top: 20px;'>Vui lòng kiểm tra và liên hệ lại nếu có bất kỳ thắc mắc nào.</p>
+                    <p style='margin-top: 40px; text-align: right;'>Trân trọng,<br><strong>%s</strong></p>
+                    <hr style='border: 0; border-top: 1px solid #ddd; margin: 30px 0;'>
+                    <p style='font-size: 12px; color: #999; text-align: center;'>Đây là email tự động, vui lòng không trả lời.</p>
+                </div>
+                """;
+                StringBuilder tableRows = new StringBuilder();
+                for (InfoUserRentRequest user : list) {
+                    tableRows.append(String.format(
+                            "<tr style='border: 1px solid #ddd;'>"
+                                    + "<td style='padding: 12px; border: 1px solid #ddd;'>%s</td>"
+                                    + "<td style='padding: 12px; border: 1px solid #ddd; text-align: right;'>%,.0f</td>"
+                                    + "<td style='padding: 12px; border: 1px solid #ddd;'>%s</td>"
+                                    + "</tr>",
+                            user.getNameUser(),
+                            user.getMoney(),
+                            user.getEmailUser()
+                    ));
+                }
+                String emailContent = body.formatted(tableRows.toString(), account.getFullName());
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+                helper.setTo(account.getEmail());
+                helper.setSubject("Thông tin người dùng chưa xác nhận khoản vay");
+                helper.setText(emailContent, true);
+                helper.setFrom("nhanphmhoang@gmail.com");
+                mailSender.send(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 }
