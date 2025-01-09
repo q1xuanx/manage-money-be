@@ -13,7 +13,7 @@ This project is the back-end API for the Manage Money system, which helps users 
 - **Backend Framework**: Spring Boot
 - **Database**: PostgreSQL
 - **REST API**: Standardized API for front-end interaction
-- **HOSTING**: Render (Docker Image) 
+- **HOSTING**: Render (Docker Image) | EC2 
 
 ## Installation
 
