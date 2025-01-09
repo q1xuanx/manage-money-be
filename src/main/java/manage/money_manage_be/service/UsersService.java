@@ -22,6 +22,9 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 @Service
 public class UsersService {
@@ -35,6 +38,7 @@ public class UsersService {
     private EmailServices emailServices;
     @Autowired
     private TransactionHistoryServices transactionHistoryServices;
+    private Logger log = Logger.getLogger(UsersService.class.getName());
     public APIResponse createUser(CreateNewUserRequest user) {
         if (user.getNameUser().isEmpty()) {
             return new APIResponse(400, "name is empty", null);
@@ -197,7 +201,8 @@ public class UsersService {
             }
         }
         if (sendEmailBack.isEmpty()){
-            System.out.println("Task complete, remove: " + count + " users -> continue send email back for account");
+            int finalCount = count;
+            log.log(Level.INFO, () -> "Task complete, remove: " + finalCount + " users -> continue send email back for account");
             return;
         }
         ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -206,7 +211,7 @@ public class UsersService {
             Set<InfoUserRentRequest> listUserNotConfirm = entry.getValue();
             completionService.submit(() -> {
                 emailServices.sendBackEmailToAccount(entry.getKey(), mailSender, listUserNotConfirm);
-                System.out.println("Send email to: " + entry.getKey().getEmail());
+                log.log(Level.INFO, () -> "Send email to: " + entry.getKey().getEmail());
                 return null;
             });
         }
