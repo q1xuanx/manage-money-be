@@ -169,9 +169,60 @@ public class EmailServices {
                         "</div>";
                 helper.setText(body, true);
                 helper.setFrom("nhanphmhoang@gmail.com");
-                helper.setTo(user.getEmail());
                 mailSender.send(message);
             }catch (Exception e){
+                e.printStackTrace();
+            }
+        });
+    }
+    public void thanksEmail(String email, JavaMailSender mailSender){
+        CompletableFuture.runAsync(() -> {
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message);
+                helper.setFrom("nhanphmhoang@gmail.com");
+                helper.setTo(email);
+                helper.setSubject("Thanks Letter");
+                String body = "<html>"
+                        + "<head>"
+                        + "<style>"
+                        + "  body { font-family: 'Arial', sans-serif; background-color: #0a0a0a; margin: 0; padding: 0; }"
+                        + "  .container { max-width: 600px; margin: 20px auto; padding: 20px; background-color: #1a1a1a; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }"
+                        + "  h2 { color: #ffd700; text-align: center; font-size: 28px; margin-bottom: 20px; }"
+                        + "  p { color: #ffffff; line-height: 1.6; font-size: 16px; }"
+                        + "  .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ffd700; text-align: center; color: #ffd700; }"
+                        + "  .new-year-text { color: #ffd700; font-weight: bold; text-align: center; font-size: 24px; margin-top: 20px; }"
+                        + "  .fireworks { text-align: center; margin-top: 20px; }"
+                        + "  .fireworks span { display: inline-block; width: 10px; height: 10px; background-color: #ffd700; border-radius: 50%; margin: 0 5px; animation: fireworks 1.5s infinite; }"
+                        + "  @keyframes fireworks {"
+                        + "    0% { transform: translateY(0) scale(1); opacity: 1; }"
+                        + "    100% { transform: translateY(-20px) scale(0.5); opacity: 0; }"
+                        + "  }"
+                        + "</style>"
+                        + "</head>"
+                        + "<body>"
+                        + "<div class='container'>"
+                        + "  <h2>Kính gửi Quý Khách,</h2>"
+                        + "  <p>Cảm ơn bạn đã tin tưởng và sử dụng ứng dụng mượn tiền trong suốt thời gian qua, năm mới chúc bạn thành công trong công việc và cuộc sống !</p>"
+                        + "  <div class='new-year-text'>Happy New Year @ 2025 - Pay Remind</div>"
+                        + "  <div class='fireworks'>"
+                        + "    <span></span>"
+                        + "    <span></span>"
+                        + "    <span></span>"
+                        + "    <span></span>"
+                        + "    <span></span>"
+                        + "  </div>"
+                        + "  <div class='footer'>"
+                        + "    <p>Trân trọng,</p>"
+                        + "    <p><strong>Pay Remind</strong></p>"
+                        + "  </div>"
+                        + "</div>"
+                        + "</body>"
+                        + "</html>";
+                helper.setText(body, true);
+                mailSender.send(message);
+                System.out.println("Send success");
+            } catch (Exception e){
                 e.printStackTrace();
             }
         });
