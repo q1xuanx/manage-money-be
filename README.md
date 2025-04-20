@@ -61,3 +61,6 @@ For any questions or suggestions, feel free to contact the developer:
 **Phạm Hoàng Nhân**
 
 Email: nhanphmhoang@gmail.com
+
+#### Achievements
+🥉 [Third place at HdBank Hackathon 2024](https://www.hutech.edu.vn/homepage/hoat-dong-sinh-vien/14622480-video-toa-sang-tai-hdbank-hackathon-2024-sinh-vien-it-hutech-va-du-an-emowatch) (WAG Team) 
